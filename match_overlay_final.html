@@ -2,109 +2,99 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<title>Overlay Leben - TikTok Live</title>
 <style>
-body {
-  background: transparent;
-  font-family: Arial, sans-serif;
-  color: white;
-  font-size: 36px;
-  line-height: 1.5;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-}
-
-.life {
-  display: inline-block;
-  transition: transform 0.3s, opacity 0.3s;
-}
-
-.dead {
-  opacity: 0;
-  transform: scale(0.3) rotate(-20deg);
-}
-
-#deathText {
-  position: absolute;
-  top: 60px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 48px;
-  color: red;
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-
+  body { 
+    background: transparent; 
+    color: white; 
+    font-size: 48px; 
+    text-align: center; 
+    margin: 0;
+    font-family: sans-serif;
+  }
+  .player {
+    margin: 20px 0;
+  }
 </style>
 </head>
-
 <body>
-<div>Player 1: 
-  <span class="life">❤️</span>
-  <span class="life">❤️</span>
-  <span class="life">❤️</span>
-  <span class="life">❤️</span>
-  <span class="life">❤️</span>
-</div>
 
-<div id="deathText">☠️ Leben verloren ☠️</div>
-
-<!-- Soundeffekt -->
-<audio id="deathSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+<div id="player1" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player2" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player3" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player4" class="player">❤️❤️❤️❤️❤️</div>
 
 <script>
-let maxLives = 5;
-let lives = maxLives;
+// =======================
+// Leben-System
+// =======================
+const maxLives = 5;
+let players = {
+  player1: maxLives,
+  player2: maxLives,
+  player3: maxLives,
+  player4: maxLives
+};
 
-function updateLives() {
-  const icons = document.querySelectorAll(".life");
-  icons.forEach((icon, index) => {
-    icon.classList.toggle("dead", index >= lives);
-  });
+function updateHearts(player) {
+  document.getElementById(player).innerHTML = "❤️".repeat(players[player]);
 }
 
-function showDeath() {
-  const text = document.getElementById("deathText");
-  text.style.opacity = 1;
-  setTimeout(() => text.style.opacity = 0, 1200);
-
-  // Sound abspielen
-  document.getElementById("deathSound").currentTime = 0;
-  document.getElementById("deathSound").play();
+function loseLife(player) {
+  if(players[player] > 0) players[player]--;
+  updateHearts(player);
 }
 
-function loseLife() {
-  if (lives > 0) {
-    lives--;
-    updateLives();
-    showDeath();
+function addLife(player) {
+  if(players[player] < maxLives) players[player]++;
+  updateHearts(player);
+}
+
+function resetLives(player) {
+  players[player] = maxLives;
+  updateHearts(player);
+}
+
+// =======================
+// Hotkeys für Tests
+// =======================
+document.addEventListener("keydown", (e) => {
+  switch(e.key.toLowerCase()) {
+    case "l": loseLife("player1"); break; // L = Leben weg (Test)
+    case "p": addLife("player1"); break;  // P = Leben dazu (Test)
+    case "r": resetLives("player1"); break; // R = Reset (Test)
   }
-}
-
-function addLife() {
-  if (lives < maxLives) {
-    lives++;
-    updateLives();
-  }
-}
-
-function resetLives() {
-  lives = maxLives;
-  updateLives();
-}
-
-// 🔑 Hotkeys
-document.addEventListener("keydown", e => {
-  if (e.key === "l") loseLife();
-  if (e.key === "p") addLife();
-  if (e.key === "r") resetLives();
 });
 
-// Optional: Chat-Trigger (Likes/Gifts) via TikFinity Hotkeys
-// Mappe Likes/Gifts in TikFinity auf Taste "P" oder "R"
+// =======================
+// Listener für Chat Events (TikFinity / Browser Events)
+// =======================
+window.addEventListener("message", (e) => {
+  if(!e.data || !e.data.type) return;
+
+  // Chat-Befehle
+  if(e.data.type === "chat") {
+    const msg = e.data.message.toLowerCase();
+    if(msg === "!hit") loseLife("player1");
+    if(msg === "!heal") addLife("player1");
+    if(msg === "!reset") resetLives("player1");
+  }
+
+  // Direkte Aktionen über Events
+  if(e.data.action && e.data.player) {
+    const player = e.data.player;
+    switch(e.data.action) {
+      case "lose": loseLife(player); break;
+      case "add": addLife(player); break;
+      case "reset": resetLives(player); break;
+    }
+  }
+});
+
+// =======================
+// Initial Update
+// =======================
+for(let p in players) updateHearts(p);
 </script>
 
 </body>
-</html>
