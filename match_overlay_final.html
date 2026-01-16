@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+body {
+  background: transparent;
+  font-family: Arial, sans-serif;
+  color: white;
+  font-size: 36px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.life {
+  display: inline-block;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.dead {
+  opacity: 0;
+  transform: scale(0.3) rotate(-20deg);
+}
+
+#deathText {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 48px;
+  color: red;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+</style>
+</head>
+
+<body>
+<div>Player 1: 
+  <span class="life">❤️</span>
+  <span class="life">❤️</span>
+  <span class="life">❤️</span>
+  <span class="life">❤️</span>
+  <span class="life">❤️</span>
+</div>
+
+<div id="deathText">☠️ Leben verloren ☠️</div>
+
+<!-- Soundeffekt -->
+<audio id="deathSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+
+<script>
+let maxLives = 5;
+let lives = maxLives;
+
+function updateLives() {
+  const icons = document.querySelectorAll(".life");
+  icons.forEach((icon, index) => {
+    icon.classList.toggle("dead", index >= lives);
+  });
+}
+
+function showDeath() {
+  const text = document.getElementById("deathText");
+  text.style.opacity = 1;
+  setTimeout(() => text.style.opacity = 0, 1200);
+
+  // Sound abspielen
+  document.getElementById("deathSound").currentTime = 0;
+  document.getElementById("deathSound").play();
+}
+
+function loseLife() {
+  if (lives > 0) {
+    lives--;
+    updateLives();
+    showDeath();
+  }
+}
+
+function addLife() {
+  if (lives < maxLives) {
+    lives++;
+    updateLives();
+  }
+}
+
+function resetLives() {
+  lives = maxLives;
+  updateLives();
+}
+
+// 🔑 Hotkeys
+document.addEventListener("keydown", e => {
+  if (e.key === "l") loseLife();
+  if (e.key === "p") addLife();
+  if (e.key === "r") resetLives();
+});
+
+// Optional: Chat-Trigger (Likes/Gifts) via TikFinity Hotkeys
+// Mappe Likes/Gifts in TikFinity auf Taste "P" oder "R"
+</script>
+
+</body>
+</html>
