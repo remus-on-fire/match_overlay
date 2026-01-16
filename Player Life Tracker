@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Overlay Leben - TikTok Live</title>
+<style>
+  body { 
+    background: transparent; 
+    color: white; 
+    font-size: 48px; 
+    text-align: center; 
+    margin: 0;
+    font-family: sans-serif;
+  }
+  .player {
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="player1" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player2" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player3" class="player">❤️❤️❤️❤️❤️</div>
+<div id="player4" class="player">❤️❤️❤️❤️❤️</div>
+
+<script>
+// =======================
+// Leben-System
+// =======================
+const maxLives = 5;
+let players = {
+  player1: maxLives,
+  player2: maxLives,
+  player3: maxLives,
+  player4: maxLives
+};
+
+function updateHearts(player) {
+  document.getElementById(player).innerHTML = "❤️".repeat(players[player]);
+}
+
+function loseLife(player) {
+  if(players[player] > 0) players[player]--;
+  updateHearts(player);
+}
+
+function addLife(player) {
+  if(players[player] < maxLives) players[player]++;
+  updateHearts(player);
+}
+
+function resetLives(player) {
+  players[player] = maxLives;
+  updateHearts(player);
+}
+
+// =======================
+// Hotkeys für Tests
+// =======================
+document.addEventListener("keydown", (e) => {
+  switch(e.key.toLowerCase()) {
+    case "l": loseLife("player1"); break; // L = Leben weg (Test)
+    case "p": addLife("player1"); break;  // P = Leben dazu (Test)
+    case "r": resetLives("player1"); break; // R = Reset (Test)
+  }
+});
+
+// =======================
+// Listener für Chat Events (TikFinity / Browser Events)
+// =======================
+window.addEventListener("message", (e) => {
+  if(!e.data || !e.data.type) return;
+
+  // Chat-Befehle
+  if(e.data.type === "chat") {
+    const msg = e.data.message.toLowerCase();
+    if(msg === "!hit") loseLife("player1");
+    if(msg === "!heal") addLife("player1");
+    if(msg === "!reset") resetLives("player1");
+  }
+
+  // Direkte Aktionen über Events
+  if(e.data.action && e.data.player) {
+    const player = e.data.player;
+    switch(e.data.action) {
+      case "lose": loseLife(player); break;
+      case "add": addLife(player); break;
+      case "reset": resetLives(player); break;
+    }
+  }
+});
+
+// =======================
+// Initial Update
+// =======================
+for(let p in players) updateHearts(p);
+</script>
+
+</body>
+</html>
